@@ -58,11 +58,11 @@
   </div>
 
 <script>
-  // آدرس Worker شما
-  const WORKER_URL = "https://emt-meduir.medu-ir.workers.dev"; 
+  // آدرس Worker جدید شما
+  const WORKER_URL = "https://diplom-dita.asnadir361.workers.dev"; 
   
-  // آدرس سایت گیت‌هاب شما (دقیقاً برابر با آدرس فعلی شما)
-  const SITE_URL = "https://emt-medu-ir.github.io/ir"; 
+  // آدرس سایت گیت‌هاب شما
+  const SITE_URL = "https://emt-medu-ir.github.io/ir/"; 
 
   let AUTH_TOKEN = "";
 
@@ -82,7 +82,7 @@
       } else {
         document.getElementById('loginError').style.display = 'block';
       }
-    } catch (e) { alert("ارتباط با سرور برقرار نشد."); }
+    } catch (e) { alert("ارتباط با سرور برقرار نشد. لطفا فیلترشکن خود را روشن کنید."); }
   }
 
   document.getElementById('adminForm').addEventListener('submit', async function(e) {
@@ -103,7 +103,7 @@
       school: document.getElementById('school').value,
       issuer: document.getElementById('issuer').value,
       status: document.getElementById('status').value,
-      photo_url: "" // فعلا خالی است
+      photo_url: "" 
     };
 
     try {
@@ -115,7 +115,7 @@
       const result = await res.json();
 
       if(result.success) {
-        const finalUrl = SITE_URL + "/?code=" + result.tracking_code;
+        const finalUrl = SITE_URL + "?code=" + result.tracking_code;
         document.getElementById('finalLink').innerText = finalUrl;
         document.getElementById('resultBox').style.display = 'block';
         this.reset();
