@@ -3,151 +3,155 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ورود به پنل مدیریت</title>
+  <title>گواهی تایید تحصیلی دوره متوسطه</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
-    body { background: #eef2f7; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-    .login-box { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-    .login-box h2 { color: #1e3a8a; margin-bottom: 20px; }
-    .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; outline: none; }
-    .login-box button { width: 100%; padding: 12px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
-    .error { color: #dc2626; font-size: 14px; margin-top: 10px; display: none; }
-    #adminFormContainer { display: none; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 800px; margin: 20px auto; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .form-group { display: flex; flex-direction: column; }
-    .form-group.full { grid-column: 1 / -1; }
-    label { font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #4b5563; }
-    input[type="text"] { padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; outline: none; }
-    .btn-submit { grid-column: 1 / -1; padding: 12px; background: #10b981; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-    .result-box { display: none; margin-top: 15px; padding: 15px; background: #ecfdf5; border: 1px solid #10b981; border-radius: 8px; text-align: center; }
-    .result-box code { background: #fff; padding: 8px 12px; border-radius: 6px; font-size: 14px; display: inline-block; direction: ltr; border: 1px solid #d1d5db; margin-top: 10px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Tahoma, "Segoe UI", sans-serif; background: #eef2f7; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 40px 16px; color: #1f2937; }
+    .card { width: 100%; max-width: 760px; background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.08); overflow: hidden; display: none; }
+    .card-header { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: #fff; padding: 18px 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand .emblem { width: 46px; height: 46px; border-radius: 50%; background: #fff; border: 2px solid rgba(255,255,255,.6); object-fit: contain; padding: 3px; flex-shrink: 0; }
+    .brand h1 { font-size: 16px; font-weight: 700; line-height: 1.5; }
+    .brand .sub { font-size: 11px; opacity: .85; margin-top: 2px; }
+    .doc-meta { text-align: left; font-size: 11px; line-height: 1.8; opacity: .95; }
+    .doc-meta span { display: block; }
+    .doc-meta b { font-weight: 700; }
+    .demo-strip { background: #fef3c7; color: #92400e; text-align: center; font-size: 12px; padding: 8px; border-bottom: 1px solid #fde68a; font-weight: 600; }
+    .doc-title { text-align: center; padding: 22px 28px 6px; }
+    .doc-title h2 { font-size: 19px; font-weight: 800; color: #1e3a8a; letter-spacing: -.2px; }
+    .doc-title p { font-size: 11px; color: #6b7280; margin-top: 5px; }
+    .body { display: grid; grid-template-columns: 150px 1fr; gap: 24px; padding: 20px 28px 28px; }
+    .photo { width: 150px; height: 180px; border-radius: 12px; border: 3px solid #e5e7eb; object-fit: cover; background: #f3f4f6; }
+    .photo-wrap { text-align: center; }
+    .photo-cap { font-size: 10px; color: #6b7280; margin-top: 6px; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; }
+    .field { border-bottom: 1px dashed #e5e7eb; padding-bottom: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    .label { font-size: 11px; color: #6b7280; margin-bottom: 4px; display: block; }
+    .value { font-size: 14px; font-weight: 600; color: #111827; }
+    .value.ltr { direction: ltr; text-align: right; font-family: "Courier New", monospace; }
+    .status { display: inline-flex; align-items: center; gap: 6px; background: #fef2f2; color: #b91c1c; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 12px; }
+    .status::before { content: ""; width: 8px; height: 8px; background: #dc2626; border-radius: 50%; }
+    .signature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 0 28px 22px; text-align: center; }
+    .sig-box { border: 1px dashed #cbd5e1; border-radius: 10px; padding: 14px 10px 12px; font-size: 11px; color: #6b7280; min-height: 90px; display: flex; flex-direction: column; justify-content: space-between; }
+    .sig-box .sig-title { font-weight: 700; color: #374151; font-size: 12px; }
+    .sig-box .sig-line { border-top: 1px solid #e5e7eb; margin-top: 10px; padding-top: 6px; color: #9ca3af; }
+    .note { border-top: 1px solid #e5e7eb; padding: 12px 28px; text-align: center; font-size: 11px; color: #92400e; background: #fffbeb; line-height: 1.9; }
+    .verify-strip { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding: 10px 28px; font-size: 10px; color: #475569; background: #f8fafc; border-top: 1px solid #e2e8f0; }
+    .verify-strip code { font-family: "Courier New", monospace; direction: ltr; background: #eef2f7; padding: 2px 8px; border-radius: 6px; color: #1e3a8a; font-weight: 700; }
+    #loadingBox, #errorBox { display: none; text-align: center; background: #fff; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.08); width: 100%; max-width: 760px; font-size: 18px; font-weight: bold; }
+    #errorBox { color: #dc2626; }
+    @media (max-width: 560px) { .body { grid-template-columns: 1fr; } .photo-wrap { display: flex; flex-direction: column; align-items: center; } .info-grid { grid-template-columns: 1fr; } .signature-row { grid-template-columns: 1fr; } .doc-meta { text-align: right; } }
   </style>
 </head>
 <body>
+  <div id="loadingBox">در حال دریافت اطلاعات از سامانه...</div>
+  <div id="errorBox"></div>
 
-  <div id="loginContainer" class="login-box">
-    <h2>ورود به پنل مدیریت</h2>
-    <input type="password" id="adminPassword" placeholder="رمز عبور را وارد کنید" />
-    <button onclick="login()">ورود</button>
-    <div id="loginError" class="error">رمز عبور اشتباه است!</div>
-  </div>
-
-  <div id="adminFormContainer">
-    <h2 style="color: #1e3a8a; margin-bottom: 20px; text-align: center;">ثبت اطلاعات متقاضی جدید</h2>
-    <form id="adminForm" class="form-grid">
-      <div class="form-group full"><label>نام و نام خانوادگی</label><input type="text" id="full_name" required></div>
-      <div class="form-group"><label>نام پدر</label><input type="text" id="father_name" required></div>
-      <div class="form-group"><label>کد ملی</label><input type="text" id="national_id" required></div>
-      <div class="form-group"><label>سال تولد</label><input type="text" id="birth_year" required></div>
-      <div class="form-group"><label>مقطع تحصیلی</label><input type="text" id="degree" value="دوره متوسطه (دیپلم)" required></div>
-      <div class="form-group"><label>رشته تحصیلی</label><input type="text" id="major" required></div>
-      <div class="form-group"><label>معدل کل</label><input type="text" id="gpa" required></div>
-      <div class="form-group"><label>تاریخ فارغ‌التحصیلی</label><input type="text" id="grad_date" required></div>
-      <div class="form-group full"><label>مدرسه / دبیرستان</label><input type="text" id="school" required></div>
-      <div class="form-group full"><label>مرجع صادرکننده</label><input type="text" id="issuer" value="اداره کل آموزش و پرورش" required></div>
-      <div class="form-group full"><label>وضعیت گواهی</label><input type="text" id="status" value="تایید شده" required></div>
-      
-      <button type="submit" class="btn-submit" id="submitBtn">ثبت اطلاعات و تولید لینک</button>
-    </form>
-
-    <div id="resultBox" class="result-box">
-      <h3 style="color: #065f46;">✅ با موفقیت ثبت شد!</h3>
-      <p style="font-size: 14px; margin-top: 5px;">لینک اختصاصی استعلام:</p>
-      <code id="finalLink"></code>
+  <div class="card" id="certificateCard">
+    <div class="card-header">
+      <div class="brand">
+        <img class="emblem" src="https://cdn.imgurl.ir/uploads/i814847_images-1.png" alt="نشان">
+        <div>
+          <h1>جمهوری اسلامی ایران — وزارت آموزش و پرورش</h1>
+          <div class="sub">سامانه رسمی استعلام و تایید تحصیلی (نسخه ۱.۱)</div>
+        </div>
+      </div>
+      <div class="doc-meta">
+        <span>شماره سند: <b id="trackingCodeDisplay">—</b></span>
+        <span>تاریخ صدور: <b>۱۴۰۵/۰۸/۱۰</b></span>
+      </div>
+    </div>
+    <div class="demo-strip">تایید تحصیلی آنلاین — این سند به صورت برخط از سامانه رسمی صادر شده است</div>
+    <div class="doc-title">
+      <h2>گواهی تایید تحصیلی دوره متوسطه</h2>
+      <p>این گواهی بر اساس اطلاعات ثبت‌شده در سامانه یکپارچه مدارس صادر گردیده است.</p>
+    </div>
+    <div class="body">
+      <div class="photo-wrap">
+        <img class="photo" id="photoDisplay" src="" alt="تصویر متقاضی">
+        <div class="photo-cap">تصویر دارنده گواهی</div>
+      </div>
+      <div class="info-grid">
+        <div class="field full"><span class="label">نام و نام خانوادگی</span><span class="value" id="nameDisplay">—</span></div>
+        <div class="field"><span class="label">کد ملی</span><span class="value ltr" id="nationalIdDisplay">—</span></div>
+        <div class="field"><span class="label">مقطع تحصیلی</span><span class="value" id="degreeDisplay">—</span></div>
+        <div class="field"><span class="label">رشته تحصیلی</span><span class="value" id="majorDisplay">—</span></div>
+        <div class="field"><span class="label">معدل کل</span><span class="value" id="gpaDisplay">—</span></div>
+        <div class="field full"><span class="label">مدرسه / دبیرستان</span><span class="value" id="schoolDisplay">—</span></div>
+        <div class="field full"><span class="label">مرجع صادرکننده</span><span class="value" id="issuerDisplay">—</span></div>
+        <div class="field"><span class="label">تاریخ فارغ‌التحصیلی</span><span class="value" id="gradDateDisplay">—</span></div>
+        <div class="field"><span class="label">وضعیت گواهی</span><span class="value"><span class="status" id="statusDisplay">—</span></span></div>
+      </div>
+    </div>
+    <div class="signature-row">
+      <div class="sig-box"><div class="sig-title">مهر و امضای مرجع صادرکننده</div><div class="sig-line" id="issuerSig">—</div></div>
+      <div class="sig-box"><div class="sig-title">تایید سامانه یکپارچه مدارس</div><div class="sig-line">امضای الکترونیکی — معتبر</div></div>
+    </div>
+    <div class="note">این گواهی صرفاً جهت اطلاع و استعلام صادر شده و هرگونه استفاده غیرمجاز از آن پیگرد قانونی دارد.<br>سامانه رسمی آموزش و پرورش — نسخه ۱.۱</div>
+    <div class="verify-strip">
+      <span>کد رهگیری سند:</span>
+      <code id="trackingCodeFooter">—</code>
+      <span>قابلیت استعلام: سامانه یکپارچه مدارس</span>
     </div>
   </div>
 
-<script>
-  // آدرس Worker جدید شما
-  const WORKER_URL = "https://diplom-dita.asnadir361.workers.dev"; 
-  
-  // آدرس سایت گیت‌هاب شما
-  const SITE_URL = "https://emt-medu-ir.github.io/ir/"; 
+  <script>
+    const WORKER_URL = "https://diplom-dita.asnadir361.workers.dev";
+    const loadingBox = document.getElementById('loadingBox');
+    const errorBox = document.getElementById('errorBox');
+    const certificateCard = document.getElementById('certificateCard');
 
-  let AUTH_TOKEN = "";
-
-  async function login() {
-    const pass = document.getElementById('adminPassword').value;
-    const btn = document.querySelector('button[onclick="login()"]');
-    btn.disabled = true;
-    btn.innerText = 'در حال بررسی...';
-
-    try {
-      const res = await fetch(`${WORKER_URL}/api/admin/login`, {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({ password: pass })
-      });
-      
-      const data = await res.json();
-      
-      if (data.success) {
-        AUTH_TOKEN = data.token; 
-        document.getElementById('loginContainer').style.display = 'none';
-        document.getElementById('adminFormContainer').style.display = 'block';
-      } else {
-        document.getElementById('loginError').style.display = 'block';
-      }
-    } catch (e) { 
-      alert("ارتباط با سرور برقرار نشد. لطفا بررسی کنید فیلترشکن شما روشن باشد و آدرس Worker درست باشد."); 
-    } finally {
-      btn.disabled = false;
-      btn.innerText = 'ورود';
+    function toPersianDigits(str) {
+        if (!str) return "";
+        return str.toString().replace(/\d/g, x => '۰۱۲۳۴۵۶۷۸۹'[x]);
     }
-  }
 
-  document.getElementById('adminForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.innerText = 'در حال ثبت...';
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
 
-    const data = {
-      full_name: document.getElementById('full_name').value,
-      father_name: document.getElementById('father_name').value,
-      national_id: document.getElementById('national_id').value,
-      birth_year: document.getElementById('birth_year').value,
-      degree: document.getElementById('degree').value,
-      major: document.getElementById('major').value,
-      gpa: document.getElementById('gpa').value,
-      grad_date: document.getElementById('grad_date').value,
-      school: document.getElementById('school').value,
-      issuer: document.getElementById('issuer').value,
-      status: document.getElementById('status').value,
-      photo_url: "" 
-    };
-
-    try {
-      const res = await fetch(`${WORKER_URL}/api/admin/add`, {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 
-            'Content-Type': 'application/json', 
-            'Authorization': 'Bearer ' + AUTH_TOKEN 
-        },
-        body: JSON.stringify(data)
-      });
-      const result = await res.json();
-
-      if(result.success) {
-        const finalUrl = SITE_URL + "?code=" + result.tracking_code;
-        document.getElementById('finalLink').innerText = finalUrl;
-        document.getElementById('resultBox').style.display = 'block';
-        this.reset();
-      } else { 
-        alert("خطا: " + (result.error || "مشکل در ثبت")); 
-      }
-    } catch(err) { 
-      alert("ارتباط با سرور برقرار نشد."); 
-    } finally {
-      btn.disabled = false;
-      btn.innerText = 'ثبت اطلاعات و تولید لینک';
+    if (!code) {
+      loadingBox.style.display = 'none';
+      errorBox.style.display = 'block';
+      errorBox.innerText = "کد استعلام در آدرس وارد نشده است. لطفا از طریق بارکد یا لینک اختصاصی خود وارد شوید.";
+    } else {
+      fetch(`${WORKER_URL}/api/check?code=${code}`)
+        .then(response => response.json().then(data => ({ status: response.status, body: data })))
+        .then(res => {
+            loadingBox.style.display = 'none';
+            if (res.status === 200 && res.body.tracking_code) {
+                certificateCard.style.display = 'block';
+                const data = res.body;
+                document.getElementById('trackingCodeDisplay').innerText = "IR-MOE-" + toPersianDigits(data.tracking_code);
+                document.getElementById('nameDisplay').innerText = data.full_name;
+                document.getElementById('nationalIdDisplay').innerText = toPersianDigits(data.national_id);
+                document.getElementById('degreeDisplay').innerText = data.degree;
+                document.getElementById('majorDisplay').innerText = data.major;
+                document.getElementById('gpaDisplay').innerText = toPersianDigits(data.gpa);
+                document.getElementById('schoolDisplay').innerText = data.school;
+                document.getElementById('issuerDisplay').innerText = data.issuer;
+                document.getElementById('gradDateDisplay').innerText = toPersianDigits(data.grad_date);
+                document.getElementById('statusDisplay').innerText = data.status;
+                document.getElementById('issuerSig').innerText = data.issuer;
+                document.getElementById('trackingCodeFooter').innerText = "IR-MOE-" + toPersianDigits(data.tracking_code);
+                
+                if (data.photo_url && data.photo_url.trim() !== "") {
+                    document.getElementById('photoDisplay').src = data.photo_url;
+                } else {
+                    // اگر عکسی ثبت نشده بود، یک عکس پیش‌فرض نشان بده
+                    document.getElementById('photoDisplay').src = "https://cdn.imgurl.ir/uploads/i007806_.jpg"; 
+                }
+            } else {
+                errorBox.style.display = 'block';
+                errorBox.innerText = "❌ " + (res.body.error || "کد صحت نامعتبر است یا اطلاعاتی برای این کد ثبت نشده است.");
+            }
+        })
+        .catch(err => {
+            loadingBox.style.display = 'none';
+            errorBox.style.display = 'block';
+            errorBox.innerText = "خطا در ارتباط با سرور. لطفا فیلترشکن خود را روشن کنید.";
+        });
     }
-  });
-</script>
+  </script>
 </body>
 </html>
