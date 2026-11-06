@@ -68,13 +68,23 @@
 
   async function login() {
     const pass = document.getElementById('adminPassword').value;
+    const btn = document.querySelector('button[onclick="login()"]');
+    btn.disabled = true;
+    btn.innerText = 'در حال بررسی...';
+
     try {
       const res = await fetch(`${WORKER_URL}/api/admin/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        mode: 'cors',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
         body: JSON.stringify({ password: pass })
       });
+      
       const data = await res.json();
+      
       if (data.success) {
         AUTH_TOKEN = data.token; 
         document.getElementById('loginContainer').style.display = 'none';
@@ -82,7 +92,12 @@
       } else {
         document.getElementById('loginError').style.display = 'block';
       }
-    } catch (e) { alert("ارتباط با سرور برقرار نشد. لطفا فیلترشکن خود را روشن کنید."); }
+    } catch (e) { 
+      alert("ارتباط با سرور برقرار نشد. لطفا بررسی کنید فیلترشکن شما روشن باشد و آدرس Worker درست باشد."); 
+    } finally {
+      btn.disabled = false;
+      btn.innerText = 'ورود';
+    }
   }
 
   document.getElementById('adminForm').addEventListener('submit', async function(e) {
@@ -109,7 +124,11 @@
     try {
       const res = await fetch(`${WORKER_URL}/api/admin/add`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AUTH_TOKEN },
+        mode: 'cors',
+        headers: { 
+            'Content-Type': 'application/json', 
+            'Authorization': 'Bearer ' + AUTH_TOKEN 
+        },
         body: JSON.stringify(data)
       });
       const result = await res.json();
@@ -119,10 +138,15 @@
         document.getElementById('finalLink').innerText = finalUrl;
         document.getElementById('resultBox').style.display = 'block';
         this.reset();
-      } else { alert("خطا: " + (result.error || "مشکل در ثبت")); }
-    } catch(err) { alert("ارتباط با سرور برقرار نشد."); }
-    btn.disabled = false;
-    btn.innerText = 'ثبت اطلاعات و تولید لینک';
+      } else { 
+        alert("خطا: " + (result.error || "مشکل در ثبت")); 
+      }
+    } catch(err) { 
+      alert("ارتباط با سرور برقرار نشد."); 
+    } finally {
+      btn.disabled = false;
+      btn.innerText = 'ثبت اطلاعات و تولید لینک';
+    }
   });
 </script>
 </body>
