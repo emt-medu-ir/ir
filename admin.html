@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ورود به پنل مدیریت</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
+    body { background: #eef2f7; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .login-box { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+    .login-box h2 { color: #1e3a8a; margin-bottom: 20px; }
+    .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; outline: none; }
+    .login-box button { width: 100%; padding: 12px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
+    .error { color: #dc2626; font-size: 14px; margin-top: 10px; display: none; }
+    #adminFormContainer { display: none; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 800px; margin: 20px auto; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #4b5563; }
+    input[type="text"] { padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; outline: none; }
+    .btn-submit { grid-column: 1 / -1; padding: 12px; background: #10b981; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    .result-box { display: none; margin-top: 15px; padding: 15px; background: #ecfdf5; border: 1px solid #10b981; border-radius: 8px; text-align: center; }
+    .result-box code { background: #fff; padding: 8px 12px; border-radius: 6px; font-size: 14px; display: inline-block; direction: ltr; border: 1px solid #d1d5db; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <div id="loginContainer" class="login-box">
+    <h2>ورود به پنل مدیریت</h2>
+    <input type="password" id="adminPassword" placeholder="رمز عبور را وارد کنید" />
+    <button onclick="login()">ورود</button>
+    <div id="loginError" class="error">رمز عبور اشتباه است!</div>
+  </div>
+
+  <div id="adminFormContainer">
+    <h2 style="color: #1e3a8a; margin-bottom: 20px; text-align: center;">ثبت اطلاعات متقاضی جدید</h2>
+    <form id="adminForm" class="form-grid">
+      <div class="form-group full"><label>نام و نام خانوادگی</label><input type="text" id="full_name" required></div>
+      <div class="form-group"><label>نام پدر</label><input type="text" id="father_name" required></div>
+      <div class="form-group"><label>کد ملی</label><input type="text" id="national_id" required></div>
+      <div class="form-group"><label>سال تولد</label><input type="text" id="birth_year" required></div>
+      <div class="form-group"><label>مقطع تحصیلی</label><input type="text" id="degree" value="دوره متوسطه (دیپلم)" required></div>
+      <div class="form-group"><label>رشته تحصیلی</label><input type="text" id="major" required></div>
+      <div class="form-group"><label>معدل کل</label><input type="text" id="gpa" required></div>
+      <div class="form-group"><label>تاریخ فارغ‌التحصیلی</label><input type="text" id="grad_date" required></div>
+      <div class="form-group full"><label>مدرسه / دبیرستان</label><input type="text" id="school" required></div>
+      <div class="form-group full"><label>مرجع صادرکننده</label><input type="text" id="issuer" value="اداره کل آموزش و پرورش" required></div>
+      <div class="form-group full"><label>وضعیت گواهی</label><input type="text" id="status" value="تایید شده" required></div>
+      
+      <button type="submit" class="btn-submit" id="submitBtn">ثبت اطلاعات و تولید لینک</button>
+    </form>
+
+    <div id="resultBox" class="result-box">
+      <h3 style="color: #065f46;">✅ با موفقیت ثبت شد!</h3>
+      <p style="font-size: 14px; margin-top: 5px;">لینک اختصاصی استعلام:</p>
+      <code id="finalLink"></code>
+    </div>
+  </div>
+
+<script>
+  // آدرس Worker شما
+  const WORKER_URL = "https://emt-meduir.medu-ir.workers.dev"; 
+  
+  // آدرس سایت گیت‌هاب شما (برای ساخت لینک نهایی متقاضی)
+  const SITE_URL = "https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO_NAME"; // ⚠️ این را با آدرس گیت‌هاب خود عوض کنید
+
+  let AUTH_TOKEN = "";
+
+  async function login() {
+    const pass = document.getElementById('adminPassword').value;
+    try {
+      const res = await fetch(`${WORKER_URL}/api/admin/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass })
+      });
+      const data = await res.json();
+      if (data.success) {
+        AUTH_TOKEN = data.token; 
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('adminFormContainer').style.display = 'block';
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+      }
+    } catch (e) { alert("ارتباط با سرور برقرار نشد."); }
+  }
+
+  document.getElementById('adminForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerText = 'در حال ثبت...';
+
+    const data = {
+      full_name: document.getElementById('full_name').value,
+      father_name: document.getElementById('father_name').value,
+      national_id: document.getElementById('national_id').value,
+      birth_year: document.getElementById('birth_year').value,
+      degree: document.getElementById('degree').value,
+      major: document.getElementById('major').value,
+      gpa: document.getElementById('gpa').value,
+      grad_date: document.getElementById('grad_date').value,
+      school: document.getElementById('school').value,
+      issuer: document.getElementById('issuer').value,
+      status: document.getElementById('status').value,
+      photo_url: "" // فعلا خالی است
+    };
+
+    try {
+      const res = await fetch(`${WORKER_URL}/api/admin/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AUTH_TOKEN },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+
+      if(result.success) {
+        const finalUrl = SITE_URL + "/?code=" + result.tracking_code;
+        document.getElementById('finalLink').innerText = finalUrl;
+        document.getElementById('resultBox').style.display = 'block';
+        this.reset();
+      } else { alert("خطا: " + (result.error || "مشکل در ثبت")); }
+    } catch(err) { alert("ارتباط با سرور برقرار نشد."); }
+    btn.disabled = false;
+    btn.innerText = 'ثبت اطلاعات و تولید لینک';
+  });
+</script>
+</body>
+</html>
