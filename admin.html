@@ -3,101 +3,156 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ورود به پنل مدیریت</title>
+  <title>پنل مدیریت</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
-    body { background: #eef2f7; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-    .login-box { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+    body { background: #eef2f7; padding: 15px; display: flex; justify-content: center; }
+    
+    .login-box { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; margin-top: 50px; }
     .login-box h2 { color: #1e3a8a; margin-bottom: 20px; }
     .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; outline: none; }
     .login-box button { width: 100%; padding: 12px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; }
     .error { color: #dc2626; font-size: 14px; margin-top: 10px; display: none; }
+
+    #mainPanel { display: none; width: 100%; max-width: 900px; }
     
-    #adminFormContainer { display: none; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 800px; margin: 20px auto; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tab-btn { flex: 1; padding: 12px; background: #e2e8f0; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; color: #475569; transition: 0.3s; }
+    .tab-btn.active { background: #2563eb; color: #fff; }
+
+    .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: none; }
+    .card.active { display: block; }
+    
+    .form-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+    @media (min-width: 600px) { .form-grid { grid-template-columns: 1fr 1fr; } }
+    
     .form-group { display: flex; flex-direction: column; }
     .form-group.full { grid-column: 1 / -1; }
     label { font-size: 13px; font-weight: bold; margin-bottom: 5px; color: #4b5563; }
-    input[type="text"] { padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; outline: none; }
+    input[type="text"] { padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; outline: none; width: 100%; }
     
-    /* استایل دکمه آپلود عکس */
-    .file-upload { border: 2px dashed #cbd5e1; padding: 15px; text-align: center; border-radius: 8px; cursor: pointer; background: #f8fafc; transition: 0.2s; }
-    .file-upload:hover { border-color: #2563eb; background: #eff6ff; }
+    .file-upload { border: 2px dashed #cbd5e1; padding: 15px; text-align: center; border-radius: 8px; cursor: pointer; background: #f8fafc; }
     .file-upload input[type="file"] { display: none; }
     .file-upload span { font-size: 14px; color: #475569; }
-    #imagePreview { max-width: 100px; max-height: 120px; margin-top: 10px; border-radius: 6px; display: none; border: 1px solid #e2e8f0; }
+    #imagePreview { max-width: 100px; max-height: 120px; margin-top: 10px; border-radius: 6px; display: none; }
 
     .btn-submit { grid-column: 1 / -1; padding: 12px; background: #10b981; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    .btn-cancel { display: none; grid-column: 1 / -1; padding: 10px; background: #ef4444; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; margin-top: 5px; text-align: center; }
+    
     .result-box { display: none; margin-top: 15px; padding: 15px; background: #ecfdf5; border: 1px solid #10b981; border-radius: 8px; text-align: center; }
-    .result-box code { background: #fff; padding: 8px 12px; border-radius: 6px; font-size: 14px; display: inline-block; direction: ltr; border: 1px solid #d1d5db; margin-top: 10px; }
+    .result-box code { background: #fff; padding: 8px 12px; border-radius: 6px; font-size: 14px; display: inline-block; direction: ltr; border: 1px solid #d1d5db; margin-top: 10px; word-break: break-all; }
+
+    .table-responsive { overflow-x: auto; width: 100%; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; text-align: center; min-width: 600px; }
+    th, td { padding: 10px; border: 1px solid #e2e8f0; }
+    th { background: #f8fafc; color: #1e3a8a; }
+    
+    .btn-action { padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; color: #fff; border: none; margin: 0 2px; }
+    .btn-delete { background: #ef4444; }
+    .btn-edit { background: #f59e0b; }
   </style>
 </head>
 <body>
 
-  <div id="loginContainer" class="login-box">
+  <div id="loginBox" class="login-box">
     <h2>ورود به پنل مدیریت</h2>
     <input type="password" id="adminPassword" placeholder="رمز عبور را وارد کنید" />
     <button onclick="login()" id="loginBtn">ورود</button>
     <div id="loginError" class="error">رمز عبور اشتباه است!</div>
   </div>
 
-  <div id="adminFormContainer">
-    <h2 style="color: #1e3a8a; margin-bottom: 20px; text-align: center;">ثبت اطلاعات متقاضی جدید</h2>
-    <form id="adminForm" class="form-grid">
-      <div class="form-group full"><label>نام و نام خانوادگی</label><input type="text" id="full_name" required></div>
-      <div class="form-group"><label>نام پدر</label><input type="text" id="father_name" required></div>
-      <div class="form-group"><label>کد ملی</label><input type="text" id="national_id" required></div>
-      <div class="form-group"><label>سال تولد</label><input type="text" id="birth_year" required></div>
-      <div class="form-group"><label>مقطع تحصیلی</label><input type="text" id="degree" value="دوره متوسطه (دیپلم)" required></div>
-      <div class="form-group"><label>رشته تحصیلی</label><input type="text" id="major" required></div>
-      <div class="form-group"><label>معدل کل</label><input type="text" id="gpa" required></div>
-      <div class="form-group"><label>تاریخ فارغ‌التحصیلی</label><input type="text" id="grad_date" required></div>
-      <div class="form-group full"><label>مدرسه / دبیرستان</label><input type="text" id="school" required></div>
-      <div class="form-group full"><label>مرجع صادرکننده</label><input type="text" id="issuer" value="اداره کل آموزش و پرورش" required></div>
-      <div class="form-group full"><label>وضعیت گواهی</label><input type="text" id="status" value="تایید شده" required></div>
-      
-      <!-- بخش آپلود عکس -->
-      <div class="form-group full">
-        <label>عکس متقاضی</label>
-        <div class="file-upload" onclick="document.getElementById('photoInput').click()">
-            <input type="file" id="photoInput" accept="image/*" onchange="previewImage(event)">
-            <span>برای انتخاب عکس کلیک کنید (لطفاً عکس کم‌حجم انتخاب کنید)</span>
-            <img id="imagePreview" alt="پیش‌نمایش عکس">
-        </div>
-      </div>
-
-      <button type="submit" class="btn-submit" id="submitBtn">ثبت اطلاعات و تولید لینک</button>
-    </form>
-
-    <div id="resultBox" class="result-box">
-      <h3 style="color: #065f46;">✅ با موفقیت ثبت شد!</h3>
-      <p style="font-size: 14px; margin-top: 5px;">لینک اختصاصی استعلام:</p>
-      <code id="finalLink"></code>
+  <div id="mainPanel">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('add')" id="tabBtnAdd">➕ ثبت متقاضی جدید</button>
+      <button class="tab-btn" onclick="switchTab('list')">📋 مدیریت متقاضیان</button>
     </div>
+
+    <div id="tab-add" class="card active">
+      <h3 id="formTitle" style="margin-bottom: 15px; color: #1e3a8a;">ثبت متقاضی جدید</h3>
+      <form id="adminForm" class="form-grid">
+        <!-- فیلد مخفی برای ذخیره ID در حالت ویرایش -->
+        <input type="hidden" id="edit_id" value="">
+        
+        <div class="form-group full"><label>نام و نام خانوادگی</label><input type="text" id="full_name" required></div>
+        <div class="form-group"><label>نام پدر</label><input type="text" id="father_name" required></div>
+        <div class="form-group"><label>کد ملی</label><input type="text" id="national_id" required></div>
+        <div class="form-group"><label>سال تولد</label><input type="text" id="birth_year" required></div>
+        <div class="form-group"><label>مقطع تحصیلی</label><input type="text" id="degree" value="دوره متوسطه (دیپلم)" required></div>
+        <div class="form-group"><label>رشته تحصیلی</label><input type="text" id="major" required></div>
+        <div class="form-group"><label>معدل کل</label><input type="text" id="gpa" required></div>
+        <div class="form-group"><label>تاریخ فارغ‌التحصیلی</label><input type="text" id="grad_date" required></div>
+        <div class="form-group full"><label>مدرسه / دبیرستان</label><input type="text" id="school" required></div>
+        <div class="form-group full"><label>مرجع صادرکننده</label><input type="text" id="issuer" value="اداره کل آموزش و پرورش" required></div>
+        <div class="form-group full"><label>وضعیت گواهی</label><input type="text" id="status" value="تایید شده" required></div>
+        
+        <div class="form-group full">
+          <label>عکس متقاضی (در حالت ویرایش، اگر عکس جدید انتخاب نکنید، عکس قبلی حفظ می‌شود)</label>
+          <div class="file-upload" onclick="document.getElementById('photoInput').click()">
+              <input type="file" id="photoInput" accept="image/*" onchange="previewImage(event)">
+              <span>برای انتخاب عکس کلیک کنید</span>
+              <img id="imagePreview" alt="پیش‌نمایش">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">ثبت و تولید لینک</button>
+        <button type="button" class="btn-cancel" id="cancelEditBtn" onclick="cancelEdit()">لغو ویرایش</button>
+      </form>
+
+      <div id="resultBox" class="result-box">
+        <h3 style="color: #065f46;">✅ عملیات با موفقیت انجام شد!</h3>
+        <code id="finalLink"></code>
+      </div>
+    </div>
+
+    <div id="tab-list" class="card">
+      <h3 style="margin-bottom: 15px; color: #1e3a8a;">لیست متقاضیان ثبت شده</h3>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>کد رهگیری</th>
+              <th>نام و نام خانوادگی</th>
+              <th>کد ملی</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody id="recordsTableBody">
+            <tr><td colspan="4">در حال بارگذاری...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 
 <script>
   const WORKER_URL = "https://diplom-dita.asnadir361.workers.dev"; 
   const SITE_URL = "https://emt-medu-ir.github.io/ir/"; 
-
   let AUTH_TOKEN = "";
-  let photoBase64 = ""; // متغیری برای ذخیره عکس به صورت متنی
+  let photoBase64 = ""; 
+  let currentPhotoBase64 = ""; // برای ذخیره عکس در حالت ویرایش
 
-  // تابع پیش‌نمایش و تبدیل عکس
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.card').forEach(card => card.classList.remove('active'));
+    
+    if(tab === 'add') {
+      document.getElementById('tabBtnAdd').classList.add('active');
+      document.getElementById('tab-add').classList.add('active');
+    } else {
+      document.querySelectorAll('.tab-btn')[1].classList.add('active');
+      document.getElementById('tab-list').classList.add('active');
+      loadRecords(); 
+    }
+  }
+
   function previewImage(event) {
     const file = event.target.files[0];
     if (!file) return;
-
-    // بررسی حجم عکس (مثلاً کمتر از ۵۰۰ کیلوبایت باشد تا دیتابیس سنگین نشود)
-    if (file.size > 500 * 1024) {
-        alert("حجم عکس نباید بیشتر از ۵۰۰ کیلوبایت باشد. لطفا عکس را فشرده کنید.");
-        event.target.value = ""; // پاک کردن فایل
-        return;
-    }
-
+    if (file.size > 500 * 1024) { alert("حجم عکس نباید بیشتر از ۵۰۰ کیلوبایت باشد."); return; }
     const reader = new FileReader();
     reader.onload = function(e) {
-        photoBase64 = e.target.result; // ذخیره رشته Base64
+        photoBase64 = e.target.result;
         const img = document.getElementById('imagePreview');
         img.src = photoBase64;
         img.style.display = 'block';
@@ -108,39 +163,31 @@
   async function login() {
     const pass = document.getElementById('adminPassword').value;
     const btn = document.getElementById('loginBtn');
-    btn.disabled = true;
-    btn.innerText = 'در حال بررسی...';
-
+    btn.disabled = true; btn.innerText = 'در حال بررسی...';
     try {
       const res = await fetch(`${WORKER_URL}/api/admin/login`, {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        method: 'POST', mode: 'cors', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: pass })
       });
-      
       const data = await res.json();
-      
       if (data.success) {
         AUTH_TOKEN = data.token; 
-        document.getElementById('loginContainer').style.display = 'none';
-        document.getElementById('adminFormContainer').style.display = 'block';
-      } else {
-        document.getElementById('loginError').style.display = 'block';
-      }
-    } catch (e) { 
-      alert("ارتباط با سرور برقرار نشد. لطفا فیلترشکن خود را روشن کنید."); 
-    } finally {
-      btn.disabled = false;
-      btn.innerText = 'ورود';
-    }
+        document.getElementById('loginBox').style.display = 'none';
+        document.getElementById('mainPanel').style.display = 'block';
+      } else { document.getElementById('loginError').style.display = 'block'; }
+    } catch (e) { alert("ارتباط با سرور برقرار نشد (فیلترشکن را روشن کنید)."); } 
+    finally { btn.disabled = false; btn.innerText = 'ورود'; }
   }
 
+  // ثبت یا ویرایش اطلاعات
   document.getElementById('adminForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.innerText = 'در حال ثبت و ارسال عکس...';
+    btn.disabled = true; 
+    btn.innerText = document.getElementById('edit_id').value ? 'در حال ویرایش...' : 'در حال ثبت...';
+
+    const id = document.getElementById('edit_id').value;
+    const isEdit = id !== "";
 
     const data = {
       full_name: document.getElementById('full_name').value,
@@ -154,37 +201,143 @@
       school: document.getElementById('school').value,
       issuer: document.getElementById('issuer').value,
       status: document.getElementById('status').value,
-      photo_url: photoBase64 // ارسال عکس به صورت متنی (Base64)
+      photo_url: photoBase64 || currentPhotoBase64 // اگر عکس جدیدی آپلود نشده، عکس قبلی را نگه دار
     };
 
+    const url = isEdit ? `${WORKER_URL}/api/admin/edit/${id}` : `${WORKER_URL}/api/admin/add`;
+    const method = isEdit ? 'PUT' : 'POST';
+
     try {
-      const res = await fetch(`${WORKER_URL}/api/admin/add`, {
-        method: 'POST',
-        mode: 'cors',
+      const res = await fetch(url, {
+        method: method, mode: 'cors',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + AUTH_TOKEN },
         body: JSON.stringify(data)
       });
       const result = await res.json();
 
       if(result.success) {
-        const finalUrl = SITE_URL + "?code=" + result.tracking_code;
-        document.getElementById('finalLink').innerText = finalUrl;
-        document.getElementById('resultBox').style.display = 'block';
-        
-        // ریست کردن فرم
-        this.reset();
-        document.getElementById('imagePreview').style.display = 'none';
-        photoBase64 = "";
-      } else { 
-        alert("خطا: " + (result.error || "مشکل در ثبت")); 
-      }
-    } catch(err) { 
-      alert("ارتباط با سرور برقرار نشد."); 
-    } finally {
-      btn.disabled = false;
-      btn.innerText = 'ثبت اطلاعات و تولید لینک';
+        if(!isEdit) {
+            document.getElementById('finalLink').innerText = SITE_URL + "?code=" + result.tracking_code;
+            document.getElementById('resultBox').style.display = 'block';
+        } else {
+            alert("ویرایش با موفقیت انجام شد.");
+            document.getElementById('resultBox').style.display = 'none';
+        }
+        cancelEdit(); // ریست کردن فرم
+        if(isEdit) switchTab('list'); // برگشت به لیست
+      } else { alert("خطا: " + (result.error || "مشکل در عملیات")); }
+    } catch(err) { alert("ارتباط با سرور برقرار نشد."); } 
+    finally { 
+        btn.disabled = false; 
+        btn.innerText = isEdit ? 'ثبت تغییرات' : 'ثبت و تولید لینک'; 
     }
   });
+
+  async function loadRecords() {
+    const tbody = document.getElementById('recordsTableBody');
+    tbody.innerHTML = '<tr><td colspan="4">در حال بارگذاری...</td></tr>';
+    try {
+      const res = await fetch(`${WORKER_URL}/api/admin/list`, {
+        method: 'GET', headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
+      });
+      const data = await res.json();
+      
+      if (data.success && data.records.length > 0) {
+        tbody.innerHTML = '';
+        data.records.forEach(r => {
+          tbody.innerHTML += `
+            <tr>
+              <td>${r.tracking_code}</td>
+              <td>${r.full_name}</td>
+              <td>${r.national_id}</td>
+              <td>
+                <button class="btn-action btn-edit" onclick="editRecord(${r.id})">ویرایش</button>
+                <button class="btn-action btn-delete" onclick="deleteRecord(${r.id})">حذف</button>
+              </td>
+            </tr>
+          `;
+        });
+      } else if (data.success && data.records.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4">هیچ رکوردی یافت نشد.</td></tr>';
+      } else { tbody.innerHTML = '<tr><td colspan="4">خطا در دریافت اطلاعات.</td></tr>'; }
+    } catch(e) { tbody.innerHTML = '<tr><td colspan="4">خطا در ارتباط با سرور.</td></tr>'; }
+  }
+
+  // رفتن به حالت ویرایش
+  async function editRecord(id) {
+    try {
+        // گرفتن اطلاعات کامل رکورد از سرور
+        const res = await fetch(`${WORKER_URL}/api/admin/get/${id}`, {
+            method: 'GET', headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
+        });
+        const data = await res.json();
+        
+        if(data.success) {
+            const r = data.record;
+            document.getElementById('edit_id').value = r.id;
+            document.getElementById('full_name').value = r.full_name;
+            document.getElementById('father_name').value = r.father_name;
+            document.getElementById('national_id').value = r.national_id;
+            document.getElementById('birth_year').value = r.birth_year;
+            document.getElementById('degree').value = r.degree;
+            document.getElementById('major').value = r.major;
+            document.getElementById('gpa').value = r.gpa;
+            document.getElementById('grad_date').value = r.grad_date;
+            document.getElementById('school').value = r.school;
+            document.getElementById('issuer').value = r.issuer;
+            document.getElementById('status').value = r.status;
+            
+            currentPhotoBase64 = r.photo_url; // ذخیره عکس قبلی
+            photoBase64 = ""; // پاک کردن انتخاب عکس جدید
+            
+            const img = document.getElementById('imagePreview');
+            if(r.photo_url) {
+                img.src = r.photo_url;
+                img.style.display = 'block';
+            } else {
+                img.style.display = 'none';
+            }
+
+            // تغییر ظاهر فرم
+            document.getElementById('formTitle').innerText = "ویرایش اطلاعات متقاضی";
+            document.getElementById('submitBtn').innerText = "ثبت تغییرات";
+            document.getElementById('submitBtn').style.background = "#f59e0b"; // رنگ نارنجی برای ویرایش
+            document.getElementById('cancelEditBtn').style.display = 'block';
+            
+            // رفتن به تب ثبت (که الان حالت ویرایش است)
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('tabBtnAdd').classList.add('active');
+            document.querySelectorAll('.card').forEach(card => card.classList.remove('active'));
+            document.getElementById('tab-add').classList.add('active');
+            document.getElementById('resultBox').style.display = 'none';
+        }
+    } catch(e) { alert("خطا در دریافت اطلاعات."); }
+  }
+
+  function cancelEdit() {
+      document.getElementById('adminForm').reset();
+      document.getElementById('edit_id').value = "";
+      document.getElementById('imagePreview').style.display = 'none';
+      photoBase64 = "";
+      currentPhotoBase64 = "";
+      
+      document.getElementById('formTitle').innerText = "ثبت متقاضی جدید";
+      document.getElementById('submitBtn').innerText = "ثبت و تولید لینک";
+      document.getElementById('submitBtn').style.background = "#10b981"; // برگشت به رنگ سبز
+      document.getElementById('cancelEditBtn').style.display = 'none';
+  }
+
+  async function deleteRecord(id) {
+    if(!confirm("آیا از حذف این متقاضی مطمئن هستید؟")) return;
+    try {
+      const res = await fetch(`${WORKER_URL}/api/admin/delete/${id}`, {
+        method: 'DELETE', headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
+      });
+      const data = await res.json();
+      if(data.success) { loadRecords(); } 
+      else { alert("خطا در حذف."); }
+    } catch(e) { alert("ارتباط با سرور برقرار نشد."); }
+  }
 </script>
 </body>
 </html>
