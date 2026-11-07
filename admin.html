@@ -39,8 +39,15 @@
     .btn-submit { grid-column: 1 / -1; padding: 12px; background: #10b981; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
     .btn-cancel { display: none; grid-column: 1 / -1; padding: 10px; background: #ef4444; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; margin-top: 5px; text-align: center; }
     
-    .result-box { display: none; margin-top: 15px; padding: 15px; background: #ecfdf5; border: 1px solid #10b981; border-radius: 8px; text-align: center; }
-    .result-box code { background: #fff; padding: 8px 12px; border-radius: 6px; font-size: 14px; display: inline-block; direction: ltr; border: 1px solid #d1d5db; margin-top: 10px; word-break: break-all; }
+    /* استایل کادر نتیجه و دکمه‌های کپی/باز کردن */
+    .result-box { display: none; margin-top: 15px; padding: 20px; background: #ecfdf5; border: 1px solid #10b981; border-radius: 8px; text-align: center; }
+    .result-box h3 { color: #065f46; margin-bottom: 15px; }
+    .link-container { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+    .link-text { background: #fff; padding: 10px; border-radius: 6px; font-size: 13px; direction: ltr; border: 1px solid #d1d5db; width: 100%; word-break: break-all; font-family: monospace; }
+    .action-buttons { display: flex; gap: 10px; width: 100%; justify-content: center; }
+    .btn-action-link { flex: 1; padding: 10px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: bold; text-decoration: none; text-align: center; display: inline-block; }
+    .btn-copy { background: #3b82f6; color: white; }
+    .btn-open { background: #f59e0b; color: white; }
 
     .table-responsive { overflow-x: auto; width: 100%; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; text-align: center; min-width: 600px; }
@@ -70,7 +77,6 @@
     <div id="tab-add" class="card active">
       <h3 id="formTitle" style="margin-bottom: 15px; color: #1e3a8a;">ثبت متقاضی جدید</h3>
       <form id="adminForm" class="form-grid">
-        <!-- فیلد مخفی برای ذخیره ID در حالت ویرایش -->
         <input type="hidden" id="edit_id" value="">
         
         <div class="form-group full"><label>نام و نام خانوادگی</label><input type="text" id="full_name" required></div>
@@ -86,7 +92,7 @@
         <div class="form-group full"><label>وضعیت گواهی</label><input type="text" id="status" value="تایید شده" required></div>
         
         <div class="form-group full">
-          <label>عکس متقاضی (در حالت ویرایش، اگر عکس جدید انتخاب نکنید، عکس قبلی حفظ می‌شود)</label>
+          <label>عکس متقاضی</label>
           <div class="file-upload" onclick="document.getElementById('photoInput').click()">
               <input type="file" id="photoInput" accept="image/*" onchange="previewImage(event)">
               <span>برای انتخاب عکس کلیک کنید</span>
@@ -99,8 +105,14 @@
       </form>
 
       <div id="resultBox" class="result-box">
-        <h3 style="color: #065f46;">✅ عملیات با موفقیت انجام شد!</h3>
-        <code id="finalLink"></code>
+        <h3>✅ عملیات با موفقیت انجام شد!</h3>
+        <div class="link-container">
+            <div class="link-text" id="finalLinkText"></div>
+            <div class="action-buttons">
+                <button class="btn-action-link btn-copy" onclick="copyLink()">📋 کپی لینک</button>
+                <a class="btn-action-link btn-open" id="openLinkBtn" href="#" target="_blank">🌐 باز کردن لینک</a>
+            </div>
+        </div>
       </div>
     </div>
 
@@ -129,8 +141,10 @@
   const WORKER_URL = "https://diplom-dita.asnadir361.workers.dev"; 
   const SITE_URL = "https://emt-medu-ir.github.io/ir/"; 
   let AUTH_TOKEN = "";
-  let photoBase64 = ""; 
-  let currentPhotoBase64 = ""; // برای ذخیره عکس در حالت ویرایش
+  
+  // متغیرهای مربوط به عکس (برای جلوگیری از قاطی شدن)
+  let newPhotoBase64 = ""; // عکس جدیدی که کاربر انتخاب می‌کند
+  let existingPhotoBase64 = ""; // عکسی که از قبل در دیتابیس بوده
 
   function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -146,15 +160,17 @@
     }
   }
 
+  // آپلود و پیش‌نمایش عکس جدید
   function previewImage(event) {
     const file = event.target.files[0];
     if (!file) return;
     if (file.size > 500 * 1024) { alert("حجم عکس نباید بیشتر از ۵۰۰ کیلوبایت باشد."); return; }
+    
     const reader = new FileReader();
     reader.onload = function(e) {
-        photoBase64 = e.target.result;
+        newPhotoBase64 = e.target.result; // ذخیره در متغیر عکس جدید
         const img = document.getElementById('imagePreview');
-        img.src = photoBase64;
+        img.src = newPhotoBase64;
         img.style.display = 'block';
     };
     reader.readAsDataURL(file);
@@ -179,15 +195,20 @@
     finally { btn.disabled = false; btn.innerText = 'ورود'; }
   }
 
-  // ثبت یا ویرایش اطلاعات
+  // ثبت یا ویرایش
   document.getElementById('adminForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
     btn.disabled = true; 
-    btn.innerText = document.getElementById('edit_id').value ? 'در حال ویرایش...' : 'در حال ثبت...';
-
     const id = document.getElementById('edit_id').value;
     const isEdit = id !== "";
+    btn.innerText = isEdit ? 'در حال ویرایش...' : 'در حال ثبت...';
+
+    // منطق انتخاب عکس: اگر عکس جدیدی آپلود شده از آن استفاده کن، وگرنه عکس قبلی را نگه دار
+    let finalPhoto = newPhotoBase64; 
+    if (!finalPhoto && isEdit) {
+        finalPhoto = existingPhotoBase64;
+    }
 
     const data = {
       full_name: document.getElementById('full_name').value,
@@ -201,7 +222,7 @@
       school: document.getElementById('school').value,
       issuer: document.getElementById('issuer').value,
       status: document.getElementById('status').value,
-      photo_url: photoBase64 || currentPhotoBase64 // اگر عکس جدیدی آپلود نشده، عکس قبلی را نگه دار
+      photo_url: finalPhoto 
     };
 
     const url = isEdit ? `${WORKER_URL}/api/admin/edit/${id}` : `${WORKER_URL}/api/admin/add`;
@@ -217,14 +238,17 @@
 
       if(result.success) {
         if(!isEdit) {
-            document.getElementById('finalLink').innerText = SITE_URL + "?code=" + result.tracking_code;
+            // ساخت لینک و نمایش کادر نتیجه
+            const finalUrl = SITE_URL + "?code=" + result.tracking_code;
+            document.getElementById('finalLinkText').innerText = finalUrl;
+            document.getElementById('openLinkBtn').href = finalUrl; // تنظیم دکمه باز کردن
             document.getElementById('resultBox').style.display = 'block';
         } else {
             alert("ویرایش با موفقیت انجام شد.");
             document.getElementById('resultBox').style.display = 'none';
+            switchTab('list');
         }
-        cancelEdit(); // ریست کردن فرم
-        if(isEdit) switchTab('list'); // برگشت به لیست
+        cancelEdit(); // ریست کردن فرم بعد از هر عملیات
       } else { alert("خطا: " + (result.error || "مشکل در عملیات")); }
     } catch(err) { alert("ارتباط با سرور برقرار نشد."); } 
     finally { 
@@ -232,6 +256,16 @@
         btn.innerText = isEdit ? 'ثبت تغییرات' : 'ثبت و تولید لینک'; 
     }
   });
+
+  // تابع کپی کردن لینک
+  function copyLink() {
+      const text = document.getElementById('finalLinkText').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+          alert("لینک با موفقیت کپی شد!");
+      }).catch(err => {
+          alert("خطا در کپی کردن لینک.");
+      });
+  }
 
   async function loadRecords() {
     const tbody = document.getElementById('recordsTableBody');
@@ -263,10 +297,8 @@
     } catch(e) { tbody.innerHTML = '<tr><td colspan="4">خطا در ارتباط با سرور.</td></tr>'; }
   }
 
-  // رفتن به حالت ویرایش
   async function editRecord(id) {
     try {
-        // گرفتن اطلاعات کامل رکورد از سرور
         const res = await fetch(`${WORKER_URL}/api/admin/get/${id}`, {
             method: 'GET', headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
         });
@@ -287,8 +319,9 @@
             document.getElementById('issuer').value = r.issuer;
             document.getElementById('status').value = r.status;
             
-            currentPhotoBase64 = r.photo_url; // ذخیره عکس قبلی
-            photoBase64 = ""; // پاک کردن انتخاب عکس جدید
+            // ریست کردن متغیرهای عکس برای جلوگیری از قاطی شدن
+            newPhotoBase64 = ""; 
+            existingPhotoBase64 = r.photo_url || "";
             
             const img = document.getElementById('imagePreview');
             if(r.photo_url) {
@@ -298,13 +331,11 @@
                 img.style.display = 'none';
             }
 
-            // تغییر ظاهر فرم
             document.getElementById('formTitle').innerText = "ویرایش اطلاعات متقاضی";
             document.getElementById('submitBtn').innerText = "ثبت تغییرات";
-            document.getElementById('submitBtn').style.background = "#f59e0b"; // رنگ نارنجی برای ویرایش
+            document.getElementById('submitBtn').style.background = "#f59e0b"; 
             document.getElementById('cancelEditBtn').style.display = 'block';
             
-            // رفتن به تب ثبت (که الان حالت ویرایش است)
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById('tabBtnAdd').classList.add('active');
             document.querySelectorAll('.card').forEach(card => card.classList.remove('active'));
@@ -318,12 +349,14 @@
       document.getElementById('adminForm').reset();
       document.getElementById('edit_id').value = "";
       document.getElementById('imagePreview').style.display = 'none';
-      photoBase64 = "";
-      currentPhotoBase64 = "";
+      
+      // ریست کردن کامل متغیرهای عکس
+      newPhotoBase64 = "";
+      existingPhotoBase64 = "";
       
       document.getElementById('formTitle').innerText = "ثبت متقاضی جدید";
       document.getElementById('submitBtn').innerText = "ثبت و تولید لینک";
-      document.getElementById('submitBtn').style.background = "#10b981"; // برگشت به رنگ سبز
+      document.getElementById('submitBtn').style.background = "#10b981"; 
       document.getElementById('cancelEditBtn').style.display = 'none';
   }
 
